@@ -48,6 +48,7 @@ $contribution_member = 0.03					# 3% of contacts will be members
 $contribution_small = 0.20					# 20% of members will give small amounts at irregular times
 $contribution_big = 0.03					# 3% of members will give large amounts of money at irregular times
 $contribution_onetime = 0.05				# 5% of members will be one time only donors 
+$male_female = 0.5							# 50% will be male, 50% will be female
 
 $contribution_timespan = 60					# payments reach up to 60 months (5 years) back
 $contribution_membership_fee = "50,00"		# 8,-€ membership fee
@@ -64,7 +65,7 @@ end
 # write contacts
 print "Writing 'contacts.csv'..."
 filename = "contacts.csv"
-header = '"Vorname","Nachname","Email","Straße","Postleitzahl","Stadt","Land","Telefon (Phone)","Telefon (Mobile)"'
+header = '"Anrede","Vorname","Nachname","Email","Straße","Postleitzahl","Stadt","Land","Telefon (Phone)","Telefon (Mobile)"'
 contactsFile = init_file(filename, header)
 for i in 1..$contact_count
 	# rotate the file
@@ -74,7 +75,13 @@ for i in 1..$contact_count
 		contactsFile = init_file(filename + extension, header)
 	end
 
-	first_name = Faker::Name.first_name
+	if SecureRandom.random_number <= $male_female
+		salutation = 'Herr'
+		first_name = Faker::Name.male_first_name
+	else
+		salutation = 'Frau'
+		first_name = Faker::Name.female_first_name
+	end
 	last_name = Faker::Name.last_name
 	
 	# make sure, that the email addresses are unique
@@ -83,7 +90,8 @@ for i in 1..$contact_count
 	end while $emails.include?(email)
 	$emails.add(email)
 	$contributors.push(email)
-	
+
+	contactsFile.write( '"' + salutation + '",')
 	contactsFile.write( '"' + first_name + '",')
 	contactsFile.write( '"' + last_name + '",')
 	contactsFile.write( '"' + email + '",')
